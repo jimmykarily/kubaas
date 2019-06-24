@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "Creating tmp directory..."
+TMP=$(mktemp -d -p $PWD kind.XXXXXXX)
+pushd $TMP
+
+echo "Getting kind binary..."
+wget https://github.com/kubernetes-sigs/kind/releases/download/v0.3.0/kind-linux-amd64
+mv kind-linux-amd64 kind
+chmod +x kind
+
+echo "Creating cluster..."
+./kind create cluster
+# kind create cluster --config valid-full-ha.yaml 
+
+echo "Copying the kubeconfig to the current directory..."
+cluster_name=$(kind get clusters)
+cp $(kind get kubeconfig-path --name="$cluster_name") kubeconfig
+
+echo "Setting KUBECONFIG env variable..."
+export KUBECONFIG=$PWD/kubeconfig
+
+echo "Create cluster role bindings..."
+kubectl create clusterrolebinding admin --clusterrole=cluster-admin --user=system:serviceaccount:kube-system:default
+
+echo "Run 'export KUBECONFIG=${TMP}/kubeconfig' in your terminal to talk to your new cluster"
+echo "Run '.${TMP}/kind delete cluster --name=${cluster_name}' to delete your cluster"
+
+popd

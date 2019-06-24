@@ -1,0 +1,15 @@
+FROM ruby:2.6.3
+
+COPY Gemfile Gemfile.lock /app/
+
+WORKDIR /app/
+RUN gem install bundler
+RUN bundle install
+RUN apt-get update && apt-get install -y nodejs
+
+# Let the docker cache work up to this point so it doesn't do a bundle install
+# unless we change the Gemfile
+COPY . /app/
+
+EXPOSE 80 443
+CMD ["bin/rails", "server", "-b", "0.0.0.0","-p", "80"]
