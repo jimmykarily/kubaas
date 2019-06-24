@@ -23,7 +23,7 @@ Prerequisites:
 
 Optional:
 
-Get yourself a local Kubernetes cluster. Although this is not necessary and you can use public cloud for everything, a local cluster is always 
+Get yourself a local Kubernetes cluster. Although this is not necessary and you can use public cloud for everything, a local cluster is always
 useful when trying things out because it's faster and costs no money at all. Some options:
 
 - [minikube](https://kubernetes.io/docs/setup/learning-environment/minikube/)
@@ -63,12 +63,45 @@ then deploy concourse with:
 helm install stable/concourse --name concourse --namespace concourse  \
 --set web.service.type="NodePort" \
 --set web.service.atcNodePort=32000 \
---set concourse.web.externalUrl=http://${nodeip}:32000
+--set concourse.web.externalUrl=http://${nodeip}:32000 \
+--set concourse.worker.baggageclaim.driver=overlay
 ```
 
 TODO: use nginx ingress to route to concourse so we can host multiple apps on our local cluster
 
 Access Concourse at `http://${nodeip}:32000` (default login `test:test`). This guide will try to explain the pipeline definitions used but you might want to have Concourse docs handy as well: https://concourse-ci.org/docs.html.
+
+## Automation - Building the app image
+
+We will now implement the pipeline that builds the application image whenever we commit to the master branch of the application source repository (git). We will assume there is a `Dockerfile` at the root of your application repository that builds the application image.
+If that's not the case, tweak the pipeline accordingly.
+
+1. Create a new ssh key to be used by the pipeline to talk to your git repository
+
+   You can follow this guide from GitHub on how to do this:
+   https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key
+
+2. Make sure you can pull the repository using this new key.
+   For GitHub follow this guide: https://developer.github.com/v3/guides/managing-deploy-keys/#deploy-keys
+
+3. Copy the sample values.yaml from the examples directory:
+
+```
+cp examples/concourse_pipeline/values.yaml.sample examples/concourse_pipeline/values.yaml
+```
+
+4. Edit `examples/concourse_pipeline/values.yaml` and add your newly generated (private) key.
+   **Make sure you never commit this file on source control!** (it's already in `.gitignore` in this repo).
+
+5. Edit the rest of the values in the `values.yaml` to match yours.
+
+6. Deploy the pipeline:
+
+```
+fly -t kind set-pipeline -l examples/concourse_pipeline/values.yaml -p deploy  -c examples/concourse_pipeline/pipeline.yaml
+```
+
+The pipeline specifies 2 resources, the application code and the docker image. The task uses the application code to build the image and puses that to the registry.
 
 ### TODO
 

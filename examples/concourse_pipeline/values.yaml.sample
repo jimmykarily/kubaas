@@ -1,0 +1,6 @@
+application-git-repo: git@github.com:my_username/myrepo.git
+github-private-key: |
+  paste your key here
+registry-password: your_container_registry_password
+registry-username: your_container_registry_username
+registry-repository: your_image_name
