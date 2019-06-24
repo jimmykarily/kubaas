@@ -103,6 +103,30 @@ fly -t kind set-pipeline -l examples/concourse_pipeline/values.yaml -p deploy  -
 
 The pipeline specifies 2 resources, the application code and the docker image. The task uses the application code to build the image and puses that to the registry.
 
+## Deploying the application
+
+For this guide we will assume our application is a RubyOnRails application although the steps to deploy any application should be almost similar. Our application will need to connect to a database and we are going to deploy that on Kubernetes as well. Deploying a database on Kubernetes means we will have to think about replication, backups and other stuff but let's first focus on getting everything running.
+We will create a [Helm](https://helm.sh/) chart for our application and all needed components to simplify the deployment and rollbacks.
+
+_This step has been heavily "inspired" by this page: https://docs.bitnami.com/kubernetes/how-to/deploy-rails-application-kubernetes-helm/_
+
+
+1. Create the registry credentials secret
+   Your app image should be in a credentials protected (aka private) registry otherwise everyone would be able to pull your application image with your application code in it. For your cluster to be able to pull that private image, you will need to provide credentials in the form of a secret living in Kubernetes. Follow the guide here for more details: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ . If you have the `config.json` at hand, create the secret:
+
+```
+kubectl create secret --namespace app generic my-registry-credentials --from-file=.dockerconfigjson=path_to_your_config.json --type=kubernetes.io/dockerconfigjson
+```
+
+2. Create a helm chart
+
+```
+helm create app_helm
+```
+
+(or just use the example in `examples/app_helm`)
+
+
 ### TODO
 
 - Describe make targets
@@ -110,3 +134,4 @@ The pipeline specifies 2 resources, the application code and the docker image. T
 - Describe how to consume this repo in a project (submodule or other?)
 
 - Can we use buildpacks to automate the building of images?
+- Use a hostPath volume to mount the code for development, check that we get "live" updates.

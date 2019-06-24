@@ -1,2 +1,3 @@
 kind.*
 examples/concourse_pipeline/values.yaml
+examples/app_helm/config.json
