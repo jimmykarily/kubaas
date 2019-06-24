@@ -16,6 +16,8 @@ Because using a PaaS usually makes deployment as easy as a `cf push` or a `git p
 Prerequisites:
 
 - You should have `kubectl` available on the machine you are planning to work on.
+- You should have `helm` available on the machine you are planning to work on.
+- You should have `tiller` running on your cluster. `helm init --upgrade` should get it for you.
 - Your should have access to at least one Kubernetes cluster.
 - You should have an application to deploy.
 
@@ -30,22 +32,43 @@ useful when trying things out because it's faster and costs no money at all. Som
 
 You can spin up a `kind` cluster by running `make kind` from the root of this repository.
 
+Install [jq](https://stedolan.github.io/jq/). You will find it extremly useful when trying to automate things to have jq around. It will let you parse output from Kube and extract the needed values.
+
 ## Building your application image
 
 To deploy your app to Kubernetes, you will need your app to run inside a container. This means, you will need to create that image somehow. There are solutions to automate this (e.g. https://buildpacks.io/) but you can also handle that yourself.
 
 A very simple example of a Dockerfile for a RubyOnRails application can be found here: [Example RoR Dockerfile](examples/RoR_Dockerfile).
 
-## Automation
+## Automation - CI
 
-Next thing is to automate the creation of your image whenever you push your changes to your master branch. A usual development workflow would look something like this:
+Next thing you want to do is to automate the creation of your image whenever you push your changes to your master branch.
+A usual development workflow would look something like this:
 
 ```
 Commit code to master -> CI runs tests -> CI creates the image -> CI deploys to Kubernetes
 ```
 
-There are many CI tools out there, with many high quality free and open source options among them. For this guide we are going to use Drone.io.
+There are many CI tools out there, with many high quality free and open source options among them. For this guide we are going to use [Concourse CI](https://concourse-ci.org/).
 
+We suggest you start with a local deployment of Concourse (on a local k8s cluster maybe?) until you get your pipelines right. Then you can worry about deploying Concourse somewhere permanently. Assuming you run a `kind` cluster and  `kubectl` talks to that cluster, first find your node's IP:
+
+```
+nodeip=$(docker inspect $(docker ps | grep kindest/node | awk '{print $1}') | jq -r .[0].NetworkSettings.Networks.bridge.IPAddress)
+```
+
+then deploy concourse with:
+
+```
+helm install stable/concourse --name concourse --namespace concourse  \
+--set web.service.type="NodePort" \
+--set web.service.atcNodePort=32000 \
+--set concourse.web.externalUrl=http://${nodeip}:32000
+```
+
+TODO: use nginx ingress to route to concourse so we can host multiple apps on our local cluster
+
+Access Concourse at `http://${nodeip}:32000` (default login `test:test`). This guide will try to explain the pipeline definitions used but you might want to have Concourse docs handy as well: https://concourse-ci.org/docs.html.
 
 ### TODO
 
