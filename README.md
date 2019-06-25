@@ -118,14 +118,43 @@ _This step has been heavily "inspired" by this page: https://docs.bitnami.com/ku
 kubectl create secret --namespace app generic my-registry-credentials --from-file=.dockerconfigjson=path_to_your_config.json --type=kubernetes.io/dockerconfigjson
 ```
 
-2. Create a helm chart
+1. Create the namespace and install nginx-ingress:
+
+We will now create the kubernetes namespace where we will deploy our application and the nginx ingress.
+The ingress controller will allow us to deploy multiple applications on the same cluster without us needing to remember any ports or IPs (in local clusters or public cloud). Use this command on your local cluster:
 
 ```
-helm create app_helm
+kubectl create namespace app && helm install stable/nginx-ingress --name ingress-nginx --namespace app --set controller.service.type=NodePort
 ```
 
-(or just use the example in `examples/app_helm`)
+A service should be created for the ingress controller and given a NodePort. You can access all ingresses through that port using the local cluster's IP.
 
+1. Create a helm chart
+
+If you were starting from scratch, you would create a helm chart with this command:
+
+```
+helm create app-helm
+```
+
+For this example we will use the already modified chart in `examples/app-helm`. This chart will create a deployment for the application and a stateful set for PostgreSQL (using the `stable/postgresql` chart). Some additional needed Kubernetes objects will also be created.
+
+
+1. Fix permissions for hostpath persistent volumes:
+
+```
+docker exec -it your_kind_container_id bash
+$ chmod  777 -R /tmp/hostpath_pv/
+```
+
+1. Deploy the app
+
+```
+helm install examples/app_helm/ --name app --namespace app
+```
+
+You should be able to access your application on `http://172.17.0.2.nip.io:32080/`
+(change the IP address to the one of your `kind` container)
 
 ### TODO
 
