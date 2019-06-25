@@ -159,14 +159,6 @@ helm create app-helm
 
 For this example we will use the already modified chart in `examples/app-helm`. This chart will create a deployment for the application and a stateful set for PostgreSQL (using the `stable/postgresql` chart). Some additional needed Kubernetes objects will also be created.
 
-
-1. Fix permissions for hostpath persistent volumes:
-
-```
-docker exec -it your_kind_container_id bash
-$ chmod  777 -R /tmp/hostpath_pv/
-```
-
 1. Deploy the app
 
 ```
