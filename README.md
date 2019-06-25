@@ -30,7 +30,7 @@ useful when trying things out because it's faster and costs no money at all. Som
 - [kind](https://github.com/kubernetes-sigs/kind)
 - [microk8s](https://microk8s.io/)
 
-You can spin up a `kind` cluster by running `make kind` from the root of this repository.
+You can spin up a `kind` cluster by running `make kind` from the root of this repository. If you want to mount your application code in the application container later, set the APPLICATION_PATH environment variable before you run `make kind` to point to the absolute path of your code directory on your local filesystem. This will mount your code under `/code` in the kind node container.
 
 Install [jq](https://stedolan.github.io/jq/). You will find it extremly useful when trying to automate things to have jq around. It will let you parse output from Kube and extract the needed values.
 
@@ -110,6 +110,13 @@ We will create a [Helm](https://helm.sh/) chart for our application and all need
 
 _This step has been heavily "inspired" by this page: https://docs.bitnami.com/kubernetes/how-to/deploy-rails-application-kubernetes-helm/_
 
+1. Create the application namespace
+
+We will now create the kubernetes namespace where we will deploy our application.
+
+```
+kubectl create namespace app
+```
 
 1. Create the registry credentials secret
    Your app image should be in a credentials protected (aka private) registry otherwise everyone would be able to pull your application image with your application code in it. For your cluster to be able to pull that private image, you will need to provide credentials in the form of a secret living in Kubernetes. Follow the guide here for more details: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ . If you have the `config.json` at hand, create the secret:
@@ -118,16 +125,29 @@ _This step has been heavily "inspired" by this page: https://docs.bitnami.com/ku
 kubectl create secret --namespace app generic my-registry-credentials --from-file=.dockerconfigjson=path_to_your_config.json --type=kubernetes.io/dockerconfigjson
 ```
 
-1. Create the namespace and install nginx-ingress:
+1. Install helm
 
-We will now create the kubernetes namespace where we will deploy our application and the nginx ingress.
+```
+helm init --upgrade
+```
+
+1. Install nginx-ingress:
+
 The ingress controller will allow us to deploy multiple applications on the same cluster without us needing to remember any ports or IPs (in local clusters or public cloud). Use this command on your local cluster:
 
 ```
-kubectl create namespace app && helm install stable/nginx-ingress --name ingress-nginx --namespace app --set controller.service.type=NodePort
+helm install stable/nginx-ingress --name ingress-nginx --namespace app --set controller.service.type=NodePort
 ```
 
 A service should be created for the ingress controller and given a NodePort. You can access all ingresses through that port using the local cluster's IP.
+
+For a public cloud you might want to deploy with something like:
+
+```
+helm install --name nginx-ingress stable/nginx-ingress --set rbac.create=true --set controller.publishService.enabled=true
+```
+
+([Read more for gke](https://cloud.google.com/community/tutorials/nginx-ingress-gke))
 
 1. Create a helm chart
 
@@ -164,3 +184,10 @@ You should be able to access your application on `http://172.17.0.2.nip.io:32080
 
 - Can we use buildpacks to automate the building of images?
 - Use a hostPath volume to mount the code for development, check that we get "live" updates.
+- Backup database
+- Rollbacks (with database)
+- How do we run database migrations?
+- SSL for the app?
+- SSL for concourse?
+- Change default password for Concourse? Is it safe to have it publicly accessible?
+- Use non-root user for postgresql on production

@@ -23,6 +23,11 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{ with .Values.developmentCluster }}
+          volumeMounts:
+            - mountPath: {{ .containerPath }}
+              name: code
+          {{ end }}
           {{ with .Values.application.env }}
           env:
             {{ toYaml . | nindent 12 }}
@@ -57,3 +62,12 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{ with .Values.developmentCluster }}
+      volumes:
+      - name: code
+        hostPath:
+          # directory location on host
+          path: {{ .hostPath }}
+          # this field is optional
+          type: Directory
+    {{ end }}

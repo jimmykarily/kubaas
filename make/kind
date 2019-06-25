@@ -9,9 +9,20 @@ wget https://github.com/kubernetes-sigs/kind/releases/download/v0.3.0/kind-linux
 mv kind-linux-amd64 kind
 chmod +x kind
 
+cat > kind-config.yaml <<EOF
+kind: Config
+apiVersion: kind.sigs.k8s.io/v1alpha2
+nodes:
+- role: control-plane
+  replicas: 1
+  extraMounts:
+    - containerPath: /code
+      hostPath: ${APPLICATION_PATH}
+      # readOnly: true
+EOF
+
 echo "Creating cluster..."
-./kind create cluster
-# kind create cluster --config valid-full-ha.yaml 
+./kind create cluster --config kind-config.yaml
 
 echo "Copying the kubeconfig to the current directory..."
 cluster_name=$(kind get clusters)

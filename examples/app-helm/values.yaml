@@ -14,11 +14,17 @@ fullnameOverride: ""
 
 registrySecretName: "my-registry-credentials"
 
-service:
-  type: ClusterIP
-  port: 80
+# Comment out this block if you are deploying on production.
+# This should be used to mount the directory with your code inside
+# the running container in your local kubernetes cluster.
+# This should enable you to live update the running instance.
+developmentCluster:
+  hostPath: /code
+  containerPath: /app
 
-postgresqlPassword: password
+service:
+  type: NodePort
+  port: 80
 
 application:
   env:
