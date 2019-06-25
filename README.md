@@ -170,7 +170,7 @@ $ chmod  777 -R /tmp/hostpath_pv/
 1. Deploy the app
 
 ```
-helm install examples/app_helm/ --name app --namespace app
+helm install examples/app-helm/ --name app --namespace app
 ```
 
 You should be able to access your application on `http://172.17.0.2.nip.io:32080/`
