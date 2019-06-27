@@ -13,12 +13,28 @@ resources:
     username: ((registry-username))
     password: ((registry-password))
 
+- name: docker-image-version
+  type: semver
+  source:
+    driver: git
+    uri: ((application-git-repo))
+    private_key: ((github-private-key))
+    branch: master
+    commit_message: "[ci skip] Bumping Docker image version to %version% in file: %file%"
+    file: docker-image-version
+
 jobs:
 - name: build-application-image
   serial: true
   plan: 
   - get: source
     trigger: true
+  - get: docker-image-version
+    params: {bump: minor}
   - put: application-docker-image
     params:
       build: source
+      tag_file: docker-image-version/version
+  - put: docker-image-version
+    params:
+      file: docker-image-version/version

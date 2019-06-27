@@ -175,7 +175,6 @@ You should be able to access your application on `http://172.17.0.2.nip.io:32080
 - Describe how to consume this repo in a project (submodule or other?)
 
 - Can we use buildpacks to automate the building of images?
-- Use a hostPath volume to mount the code for development, check that we get "live" updates.
 - Backup database
 - Rollbacks (with database)
 - How do we run database migrations?
@@ -183,3 +182,4 @@ You should be able to access your application on `http://172.17.0.2.nip.io:32080
 - SSL for concourse?
 - Change default password for Concourse? Is it safe to have it publicly accessible?
 - Use non-root user for postgresql on production
+- [DONE] Use a hostPath volume to mount the code for development, check that we get "live" updates.
