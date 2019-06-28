@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 2
+replicaCount: 1
 
 postgresql:
   postgresqlPassword: changeme
@@ -26,7 +26,7 @@ developmentCluster:
   containerPath: /app
 
 service:
-  type: NodePort
+  type: NodePort # To make ingress work on public clouds (nginx ingress works with ClusterIP too)
   port: 80
 
 application:
@@ -47,7 +47,7 @@ application:
 ingress:
   enabled: true
   annotations:
-    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
     - host: 172.17.0.2.nip.io

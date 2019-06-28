@@ -145,7 +145,11 @@ helm init --upgrade
 The ingress controller will allow us to deploy multiple applications on the same cluster without us needing to remember any ports or IPs (in local clusters or public cloud). Use this command on your local cluster:
 
 ```
-helm install stable/nginx-ingress --name ingress-nginx --namespace app --set controller.service.type=NodePort
+# This will make your ingress controller listen some random port (NodePort) of your `kind` node's IP
+#helm install stable/nginx-ingress --name ingress-nginx --namespace app --set controller.service.type=NodePort
+
+# This will make your ingress controller listen on ports 80 and 443 on the `kind` node's IP (172.17.0.2"})
+helm install stable/nginx-ingress --name ingress-nginx --namespace app --set controller.service.externalIPs={"172.17.0.2"}
 ```
 
 A service should be created for the ingress controller and given a NodePort. You can access all ingresses through that port using the local cluster's IP.
