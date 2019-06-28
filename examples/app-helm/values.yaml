@@ -4,6 +4,9 @@
 
 replicaCount: 2
 
+postgresql:
+  postgresqlPassword: changeme
+
 image:
   repository: us.gcr.io/robust-shadow-239412/myshop
   tag: latest

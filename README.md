@@ -183,3 +183,4 @@ You should be able to access your application on `http://172.17.0.2.nip.io:32080
 - Change default password for Concourse? Is it safe to have it publicly accessible?
 - Use non-root user for postgresql on production
 - [DONE] Use a hostPath volume to mount the code for development, check that we get "live" updates.
+- Monitor this issue for gce ingress and cert-manager: https://github.com/jetstack/cert-manager/issues/1666
