@@ -9,7 +9,16 @@ various needs of the development process.
 
 ## Why
 
-Because using a PaaS usually makes deployment as easy as a `cf push` or a `git push heroku master`. With Kubernetes it is still quite more complicated than that. On the other hand, everything we might need to deploy our app is available in Kubernetes so all we need is a set of scripts to simplify the process.
+Because using a PaaS usually makes deployment as easy as a `cf push` or a `git push heroku master`.  With Kubernetes it is still quite more complicated than that. On the other hand, everything we might need to deploy our app is available in Kubernetes so all we need is a set of scripts and tools to simplify the process.
+
+Why would someone want to use raw Kubernetes instead of PaaS? Here are some reason:
+
+- No vendor lock-in. Deploying to another Kubernetes provider should require minimum effort.
+- More control. With Kubernetes you can control how you deploy, how you scale and in general every aspect of your infrastructure. Depending on whether you need it or not, this could also be a bad thing.
+- Cost. Depending on the selected PaaS solution and the Kubernetes vendor, a Kubernetes cluster of the same resources could cost less.  Also, in a managed PaaS, services like databases (e.g. A PostgreSQL database) do not come for free. With Kubernetes you have the option to host the service on the same cluster as your application. Ofcourse you will then have to take care of replication, backups etc.
+- Similarity between development and production environments.
+  You can use a local Kubernetes cluster for development with minimum changes compared to the production one. This means less "but-it-works-on-development" moments.
+  This repository provides some help in setting up such a development environment.
 
 ## Getting started
 
